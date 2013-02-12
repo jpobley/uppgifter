@@ -1,0 +1,11 @@
+Steps from meeting on 2/8/13
+
+1. Process Census excel file. (DONE)
+  -- Create TSV and/or CSV file
+  
+2. Scrape data from UFO site. (Malcolm)
+  -- Scrape each page by state
+    -- Create list of state abbreviations from downloaded CSV file
+    -- Use each abbreviation to iterate through each HTML page on UFO database
+    -- Turn data from a city entry into a county entry
+  -- Create TSV and/or CSV file with data from page scrapes.
