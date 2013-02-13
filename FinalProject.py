@@ -4,7 +4,7 @@ import re, urllib, urllib2, json, time, pickle
 #####################################
 ##        Step One - Malcolm       ##
 #####################################
-
+'''
 #statesfile = open('state-abbreviations.csv')
 #output1 = open('UFOdata.txt', 'wb')
 
@@ -47,47 +47,61 @@ import re, urllib, urllib2, json, time, pickle
 #		output3.write('\n')
 #	except:
 #		continue
-
+'''
 #################################
 ##        Step Two - JP        ##
 #################################
-
+'''
 #read txt file from step one
 f = open('IWantToBelieve.txt', 'rU')
-citystate = f.readlines()
+sightings = f.readlines()
 f.close()
-f = open("text.txt", "wb")
 
-#strip \n character from each line
+abbr = statesfile.readlines()
+statesfile.close()
+
+#strip \n character from each line in abbr
 i = 0
-while i < len(citystate):
-    citystate[i] = citystate[i].rstrip('\n')
+while i < len(abbr):
+    abbr[i] = abbr[i].rstrip('\r\n')
+    i += 1
+    
+#strip \n character from each line in citystate
+i = 0
+while i < len(sightings):
+    sightings[i] = sightings[i].rstrip('\r\n')
     i += 1
 
-cities = {}
-regex = re.compile(r'[(),0-9/-?.@#$]')
-for line in citystate:
-  real = "AL"
-  city, state = line.split('\t')
-  if state == real:
-    if not regex.search(city):
-      cities[city] = cities.get(city, 0) + 1
-print cities
-#half = "_Features_20121204.txt"
+#read cities and counties and sightings per county into massive dictionary
+everything = {}
+funnyStuff = re.compile(r'[0-9/\-?,!@#$%&*()]')
+path = "AllStates_20121204/{0}_Features_20121204.txt"
+for state in abbr:
+  counties = {}
+  cities = {}
+  print "Scanning " + state + "..."
+  f = open(path.format(state))
+  features = f.readlines()
+  f.close()
+  for line in sightings:
+    if not funnyStuff.search(line):
+      city, st = line.split('\t')
+      if st == state:
+        cities[city] = cities.get(city, 0) + 1
+        for feat in features:
+          feat = feat.split('|')
+          if city == feat[1] and feat[2] == "Populated Place":
+            county = feat[5]
+            counties[county] = counties.get(county, 0) + cities[city]
+  everything[state] = counties
+save = open('sightingsStCo.pkl', 'wb')
+pickle.dump(everything, save)
+save.close()
+'''
+#######################################
+##        Step Three - Darren        ##
+#######################################
 
-'''
-address = 'Wyoming (various towns)	WY'
-county = ''
-base_url = 'http://maps.googleapis.com/maps/api/geocode/xml?'
-data = {}
-data['address'] = address
-data['sensor'] = 'false'
-full_url = base_url + urllib.urlencode(data)
-response = urllib2.urlopen(full_url)
-info = response.read()
-root = ET.fromstring(info)
-for each in root.findall('.//address_component'):
-  if each.find('type') is not None:
-    if each.find('type').text == "administrative_area_level_2":
-      zipcode = each.find('long_name').text
-'''
+#load pickle file of sightings dictionary
+all = pickle.load(open('sightingsStCo.pkl', 'rU'))
+print all["MI"]["Washtenaw"]
