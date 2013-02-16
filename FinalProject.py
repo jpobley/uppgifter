@@ -1,10 +1,10 @@
 from bs4 import BeautifulSoup
 import re, urllib, urllib2, json, time, pickle, csv, itertools
-
+'''
 #####################################
 ##        Step One - Malcolm       ##
 #####################################
-'''
+
 #statesfile = open('state-abbreviations.csv')
 #output1 = open('UFOdata.txt', 'wb')
 
@@ -21,32 +21,38 @@ import re, urllib, urllib2, json, time, pickle, csv, itertools
 #	time.sleep(5)
 #output1.close()
 
-#ufodatafile = open('UFOdata.txt', 'r')
-#output2 = open('TheXFile.txt.', 'wb')
-#for line in ufodatafile:
-#	try:
-#		sighting = re.findall('<td.*?<font\scolor=\"#000000\"\sface=\"Calibri\"\sstyle=\"FONT-SIZE:11pt\">(.*?)</font></td>', line)
-#		try:
-#			output2.write(str(sighting[0]))
-#			output2.write('\t')
-#		except:
-#			output2.write('\n')
-#	except:
-#		continue
+ufodatafile = open('UFOdata.txt', 'r')
+output2 = open('TheXFile.txt.', 'wb')
+for line in ufodatafile:
+	try:
+		try:
+			year = re.findall('<td.*?<font\scolor=\"#000000\"\sface=\"Calibri\"\sstyle=\"FONT-SIZE:11pt\"><a.*?>\d*?/\d.*?/(.*?)\s.+</a></font></td>', line)
+			output2.write(year[0])
+			output2.write('\t')
+		except:
+			try:
+				sighting = re.findall('<td.*?<font\scolor=\"#000000\"\sface=\"Calibri\"\sstyle=\"FONT-SIZE:11pt\">(.*?)</font></td>', line)
+				output2.write(str(sighting[0]))
+				output2.write('\t')
+			except:
+				output2.write('\n')
+	except:
+		continue
 
-#output2.close()
-#WeAreNotAlone = open('TheXFile.txt.', 'r')
-#output3 = open('IWantToBelieve.txt', 'wb')
+output2.close()
+WeAreNotAlone = open('TheXFile.txt.', 'r')
+output3 = open('IWantToBelieve.txt', 'wb')
 
-#for line in WeAreNotAlone:
-#	try:
-#		line = line.split('\t')
-#		state = line[2]
-#		city = line[1]
-#		output3.write(city+'\t'+state)
-#		output3.write('\n')
-#	except:
-#		continue
+for line in WeAreNotAlone:
+	try:
+		line = line.split('\t')
+		state = line[2]
+		city = line[1]
+		date = line[0]
+		output3.write(date+'\t'+city+'\t'+state)
+		output3.write('\n')
+	except:
+		continue
 '''
 #################################
 ##        Step Two - JP        ##
@@ -103,9 +109,8 @@ save.close()
 #######################################
 
 #load pickle file of sightings dictionary
-all = pickle.load(open('sightingsStCo.pkl', 'rU'))
-#print all["SD"]["Buffalo"]
-#quit()
+#all = pickle.load(open('sightingsStCo.pkl', 'rU'))
+#print all["IL"]#["Marion"]
 
 '''
 #read in a bunch of census data into a list of lists, census data is stored in a modified csv file
@@ -135,7 +140,7 @@ save = open('census_combined.pkl', 'wb')
 pickle.dump(census_lol1, save)
 save.close()
 '''
-
+''''
 #go get that pickled combined census list of lists created previously
 census = pickle.load(open('census_combined.pkl', 'rU'))
 
@@ -160,24 +165,10 @@ for item in census:
 
 #horribly imbedded for/if loop with the lone end goal of appending the combined list census data for each county onto the proper county in dictionary of dictionaries of lists, after the number of UFOs
 for state in all:
-    for county in state:
+    for county in all[state]:
         for i in range(len(census)):
-            if census[i][1] == state and census[i][0] != county:
-                all[state][census[i][0]] = all.get(census[i][0],[0]) 
-                all[state][census[i][0]] += census[i]
-                #print all[state][census[i][0]]
-                #quit()
             if census[i][1] == state and census[i][0] == county:
                 all[state][county] += census[i]
-                #print all[state][county]
-                #quit()
-# #horribly imbedded for/if loop with the lone end goal of appending the combined list census data for each county onto the proper county in dictionary of dictionaries of lists, after the number of UFOs
-# for state in all:
-#     for county in all[state]:
-#         for i in range(len(census)):
-#             if census[i][1] == state and census[i][0] == county:
-#                 all[state][county] += census[i]
-
 
 # from our final dictionary of dictionaries of lists named all,
 # these are the pertitent items for us to correlate:
@@ -188,21 +179,18 @@ for state in all:
 # all[state][county][32] = population of county
 
 # richest county in the US via wikipedia table
-print '   --- Loudoun County Virginia --- '
-print '   Reported UFO sightings: ' + str(all["VA"]["Loudoun"][0]) 
-print '   Median Household Income: ' + str(all["VA"]["Loudoun"][3])
-print '   Percent (all ages) in Poverty: ' + str(all["VA"]["Loudoun"][4])                
-print '   Population: ' + str(all["VA"]["Loudoun"][32])
+print '   --- Brevard County Florida --- '
+print '   Reported UFO sightings: ' + str(all["FL"]["Brevard"][0]) 
+print '   Median Household Income: ' + str(all["FL"]["Brevard"][3])
+print '   Percent (all ages) in Poverty: ' + str(all["FL"]["Brevard"][4])                
+print '   Population: ' + str(all["FL"]["Brevard"][32])
 
 # poorest county in the US via wikipedia table
-print 'Buffalo County South Dakota: '
-print all["SD"]["Buffalo"][0]  
-print all["SD"]["Buffalo"][3]  
-print all["SD"]["Buffalo"][4]                  
-print all["SD"]["Buffalo"][32] 
-
-for each in all[state]:
-  print all["WA"][each]  
+#print 'Buffalo County South Dakota: '
+#print all["SD"]["Buffalo"][0]  
+#print all["SD"]["Buffalo"][3]  
+#print all["SD"]["Buffalo"][4]                  
+#print all["SD"]["Buffalo"][32]  
 #############################################################################################
 ### uh oh, Houston we have a problem = where's the data for Buffalo County South Dakota?
 ### well, it's in the Census counties (in both Census CSV files) but looks
@@ -213,4 +201,4 @@ for each in all[state]:
 ###
 ### as it's 4:54am so I'm going to take a nap maybe when I wake up I'll have a fix -Darren
 #############################################################################################
-
+'''
