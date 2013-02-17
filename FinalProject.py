@@ -1,13 +1,13 @@
-from bs4 import BeautifulSoup
-import re, urllib, urllib2, json, time, pickle, csv, itertools
-'''
+#from bs4 import BeautifulSoup
+import re, urllib, urllib2, json, time, pickle, csv, itertools, string
+
 #####################################
 ##        Step One - Malcolm       ##
 #####################################
 
 #statesfile = open('state-abbreviations.csv')
 #output1 = open('UFOdata.txt', 'wb')
-
+'''
 #for line in statesfile:
 #	state = line.strip()
 #	print state
@@ -63,6 +63,7 @@ f = open('IWantToBelieve.txt', 'rU')
 sightings = f.readlines()
 f.close()
 
+#load abbreviations
 abbr = statesfile.readlines()
 statesfile.close()
 
@@ -79,10 +80,14 @@ while i < len(sightings):
     i += 1
 
 #read cities and counties and sightings per county into massive dictionary
+geo = {}
 everything = {}
 funnyStuff = re.compile(r'[0-9/\-?,!@#$%&*()]')
+startNum = re.compile(r'^\d')
 path = "AllStates_20121204/{0}_Features_20121204.txt"
+years = ["00","01","02","03","04","05","06","07","08","09","10","11","12","13"]
 for state in abbr:
+  stateDict = {}
   counties = {}
   cities = {}
   print "Scanning " + state + "..."
@@ -90,18 +95,31 @@ for state in abbr:
   features = f.readlines()
   f.close()
   for line in sightings:
-    if not funnyStuff.search(line):
-      city, st = line.split('\t')
-      if st == state:
-        cities[city] = cities.get(city, 0) + 1
-        for feat in features:
-          feat = feat.split('|')
-          if city == feat[1] and feat[2] == "Populated Place":
-            county = feat[5]
-            counties[county] = counties.get(county, 0) + cities[city]
+    if line[0].isdigit():
+      line = line.split('\t')
+      yr = line[0]
+      cty = line[1]
+      st = line[2]
+      if not funnyStuff.search(cty) and yr in years:
+        if st == state:
+          cities[cty] = cities.get(cty, 0) + 1
+          for feat in features:
+            feat = feat.split('|')
+            if cty == feat[1] and feat[2] == "Populated Place":
+              county = feat[5]
+              counties[county] = counties.get(county, 0) + cities[cty]
+              if county not in stateDict:
+                stateDict[county] = (feat[9], feat[10])
   everything[state] = counties
+  geo[state] = stateDict
+#save dictionary of states--counties--sightings
 save = open('sightingsStCo.pkl', 'wb')
 pickle.dump(everything, save)
+save.close()
+
+#save dictionary of states--counties--coordinates
+save = open('geo.pkl', 'wb')
+pickle.dump(geo, save)
 save.close()
 '''
 #######################################
@@ -109,8 +127,8 @@ save.close()
 #######################################
 
 #load pickle file of sightings dictionary
-#all = pickle.load(open('sightingsStCo.pkl', 'rU'))
-#print all["IL"]#["Marion"]
+all = pickle.load(open('sightingsStCo.pkl', 'rU'))
+print all["MI"]["Washtenaw"]
 
 '''
 #read in a bunch of census data into a list of lists, census data is stored in a modified csv file
