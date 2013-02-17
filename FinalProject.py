@@ -109,7 +109,7 @@ for state in abbr:
               county = feat[5]
               counties[county] = counties.get(county, 0) + cities[cty]
               if county not in stateDict:
-                stateDict[county] = (feat[9], feat[10])
+                stateDict[county] = (float(feat[9]), float(feat[10]))
   everything[state] = counties
   geo[state] = stateDict
 #save dictionary of states--counties--sightings
@@ -127,8 +127,8 @@ save.close()
 #######################################
 
 #load pickle file of sightings dictionary
-all = pickle.load(open('sightingsStCo.pkl', 'rU'))
-print all["MI"]["Washtenaw"]
+#all = pickle.load(open('sightingsStCo.pkl', 'rU'))
+#print all["MI"]["Washtenaw"]
 
 '''
 #read in a bunch of census data into a list of lists, census data is stored in a modified csv file
